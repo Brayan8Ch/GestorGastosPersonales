@@ -112,7 +112,7 @@ export function TransactionModal({ open, onClose, onSave, userId, editing, cards
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Categoría</Label>
-              <Select value={resolvedCategory} onValueChange={setCategory}>
+              <Select value={resolvedCategory} onValueChange={(v) => setCategory(v ?? '')}>
                 <SelectTrigger><SelectValue>{resolvedCategory}</SelectValue></SelectTrigger>
                 <SelectContent>
                   {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -128,7 +128,7 @@ export function TransactionModal({ open, onClose, onSave, userId, editing, cards
           {type === 'expense' && expenseCards.length > 0 && (
             <div className="space-y-2">
               <Label>Tarjeta <span className="text-muted-foreground">(opcional)</span></Label>
-              <Select value={cardId} onValueChange={setCardId}>
+              <Select value={cardId} onValueChange={(v) => setCardId(v ?? 'none')}>
                 <SelectTrigger><SelectValue placeholder="Sin tarjeta" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Sin tarjeta</SelectItem>
