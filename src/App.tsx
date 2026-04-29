@@ -1,0 +1,121 @@
+import { useState } from 'react'
+import { useAuth } from '@/hooks/useAuth'
+import { useTransactions } from '@/hooks/useTransactions'
+import { useSavings } from '@/hooks/useSavings'
+import { useCards } from '@/hooks/useCards'
+import { AppLayout } from '@/components/layout/AppLayout'
+import { AuthPage } from '@/pages/AuthPage'
+import { DashboardPage, MONTHS } from '@/pages/DashboardPage'
+import { TransactionsPage } from '@/pages/TransactionsPage'
+import { TransactionModal } from '@/components/transactions/TransactionModal'
+import { ReceiptModal } from '@/components/transactions/ReceiptModal'
+import type { Transaction, TransactionPayload } from '@/types'
+
+type View = 'dashboard' | 'transactions'
+
+export default function App() {
+  const { user, loading, signIn, signUp, signOut } = useAuth()
+
+  const now = new Date()
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(now.getFullYear())
+  const [view, setView] = useState<View>('dashboard')
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editing, setEditing] = useState<Transaction | null>(null)
+  const [receiptPath, setReceiptPath] = useState<string | null>(null)
+
+  const userId = user?.id ?? ''
+
+  const { transactions, save, remove, uploadReceipt, getReceiptUrl, income, expense, balance } =
+    useTransactions(userId, month, year)
+  const { platforms, total: savingsTotal, save: savePlatform, remove: deletePlatform } = useSavings(userId)
+  const { cards, save: saveCard, remove: deleteCard } = useCards(userId)
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-6 h-6 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return <AuthPage onSignIn={signIn} onSignUp={signUp} />
+  }
+
+  const prevMonth = () => {
+    if (month === 1) { setMonth(12); setYear(y => y - 1) } else setMonth(m => m - 1)
+  }
+  const nextMonth = () => {
+    if (month === 12) { setMonth(1); setYear(y => y + 1) } else setMonth(m => m + 1)
+  }
+
+  const handleSave = async (payload: TransactionPayload, file?: File, id?: string) => {
+    let receipt_url = editing?.receipt_url ?? null
+    if (file) receipt_url = await uploadReceipt(file)
+    await save({ ...payload, receipt_url }, id)
+  }
+
+  const openAdd = () => { setEditing(null); setModalOpen(true) }
+  const openEdit = (t: Transaction) => { setEditing(t); setModalOpen(true) }
+
+  const handleDelete = async (id: string) => {
+    await remove(id)
+  }
+
+  return (
+    <AppLayout
+      email={user.email ?? ''}
+      view={view}
+      onViewChange={setView}
+      onSignOut={signOut}
+      monthLabel={`${MONTHS[month - 1]} ${year}`}
+      onPrevMonth={prevMonth}
+      onNextMonth={nextMonth}
+    >
+      {view === 'dashboard' ? (
+        <DashboardPage
+          transactions={transactions}
+          income={income}
+          expense={expense}
+          balance={balance}
+          platforms={platforms}
+          savingsTotal={savingsTotal}
+          cards={cards}
+          userId={userId}
+          month={month}
+          year={year}
+          onAdd={openAdd}
+          onOpenTransaction={openEdit}
+          onSavePlatform={savePlatform}
+          onDeletePlatform={deletePlatform}
+          onSaveCard={saveCard}
+          onDeleteCard={deleteCard}
+        />
+      ) : (
+        <TransactionsPage
+          transactions={transactions}
+          onAdd={openAdd}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+          onViewReceipt={path => setReceiptPath(path)}
+        />
+      )}
+
+      <TransactionModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        userId={userId}
+        editing={editing}
+        cards={cards}
+      />
+
+      <ReceiptModal
+        path={receiptPath}
+        onClose={() => setReceiptPath(null)}
+        getUrl={getReceiptUrl}
+      />
+    </AppLayout>
+  )
+}
