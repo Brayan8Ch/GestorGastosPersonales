@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Supabase CLI local state
+supabase/.temp/
+
 # Claude Code local config
 .claude
 .agents

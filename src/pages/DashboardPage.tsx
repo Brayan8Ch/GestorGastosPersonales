@@ -60,25 +60,25 @@ export function DashboardPage({
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
-          <p className={`num text-5xl font-semibold tracking-tight leading-none ${isPositive ? 'text-primary' : 'text-destructive'}`}>
+          <p className={`num text-3xl sm:text-5xl font-semibold tracking-tight leading-none ${isPositive ? 'text-primary' : 'text-destructive'}`}>
             {formatARS(balance)}
           </p>
-          <div className="flex items-center gap-5 mt-5">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
             <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground">Ingresos</p>
-              <p className="num text-xl font-semibold text-primary">{formatARS(income)}</p>
+              <p className="num text-base sm:text-xl font-semibold text-primary">{formatARS(income)}</p>
             </div>
-            <div className="w-px h-8 bg-border" />
+            <div className="hidden sm:block w-px h-8 bg-border" />
             <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground">Egresos</p>
-              <p className="num text-xl font-semibold text-destructive">{formatARS(expense)}</p>
+              <p className="num text-base sm:text-xl font-semibold text-destructive">{formatARS(expense)}</p>
             </div>
             {income > 0 && (
               <>
-                <div className="w-px h-8 bg-border" />
+                <div className="hidden sm:block w-px h-8 bg-border" />
                 <div className="space-y-0.5">
                   <p className="text-xs text-muted-foreground">Tasa ahorro</p>
-                  <p className={`num text-xl font-semibold ${isPositive ? 'text-primary' : 'text-destructive'}`}>
+                  <p className={`num text-base sm:text-xl font-semibold ${isPositive ? 'text-primary' : 'text-destructive'}`}>
                     {(((income - expense) / income) * 100).toFixed(0)}%
                   </p>
                 </div>

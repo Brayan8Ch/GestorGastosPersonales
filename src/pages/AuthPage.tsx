@@ -6,29 +6,20 @@ import { Label } from '@/components/ui/label'
 
 interface Props {
   onSignIn: (email: string, password: string) => Promise<void>
-  onSignUp: (email: string, password: string) => Promise<void>
 }
 
-export function AuthPage({ onSignIn, onSignUp }: Props) {
-  const [mode, setMode] = useState<'login' | 'register'>('login')
+export function AuthPage({ onSignIn }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    setSuccess('')
     setLoading(true)
     try {
-      if (mode === 'login') {
-        await onSignIn(email, password)
-      } else {
-        await onSignUp(email, password)
-        setSuccess('Cuenta creada. Revisá tu email para confirmar.')
-      }
+      await onSignIn(email, password)
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Error desconocido')
     } finally {
@@ -51,20 +42,6 @@ export function AuthPage({ onSignIn, onSignUp }: Props) {
 
         <Card>
           <CardContent className="pt-6">
-            <div className="flex bg-muted rounded-lg p-1 mb-6 gap-1">
-              {(['login', 'register'] as const).map(m => (
-                <button
-                  key={m}
-                  onClick={() => { setMode(m); setError(''); setSuccess('') }}
-                  className={`flex-1 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    mode === m ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground'
-                  }`}
-                >
-                  {m === 'login' ? 'Iniciar sesión' : 'Registrarse'}
-                </button>
-              ))}
-            </div>
-
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
@@ -78,12 +55,9 @@ export function AuthPage({ onSignIn, onSignUp }: Props) {
               {error && (
                 <p className="text-xs text-destructive bg-destructive/10 border border-destructive/20 rounded-md px-3 py-2">{error}</p>
               )}
-              {success && (
-                <p className="text-xs text-primary bg-primary/10 border border-primary/20 rounded-md px-3 py-2">{success}</p>
-              )}
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? '...' : mode === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+                {loading ? '...' : 'Iniciar sesión'}
               </Button>
             </form>
           </CardContent>

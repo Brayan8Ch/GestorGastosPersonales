@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '@/hooks/useAuth'
+import { useProfile } from '@/hooks/useProfile'
 import { useTransactions } from '@/hooks/useTransactions'
 import { useSavings } from '@/hooks/useSavings'
 import { useCards } from '@/hooks/useCards'
@@ -7,14 +8,16 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthPage } from '@/pages/AuthPage'
 import { DashboardPage, MONTHS } from '@/pages/DashboardPage'
 import { TransactionsPage } from '@/pages/TransactionsPage'
+import { SuperAdminPage } from '@/pages/SuperAdminPage'
 import { TransactionModal } from '@/components/transactions/TransactionModal'
 import { ReceiptModal } from '@/components/transactions/ReceiptModal'
 import type { Transaction, TransactionPayload } from '@/types'
 
-type View = 'dashboard' | 'transactions'
+type View = 'dashboard' | 'transactions' | 'admin'
 
 export default function App() {
-  const { user, loading, signIn, signUp, signOut } = useAuth()
+  const { user, loading, signIn, signOut } = useAuth()
+  const { profile } = useProfile(user)
 
   const now = new Date()
   const [month, setMonth] = useState(now.getMonth() + 1)
@@ -40,7 +43,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <AuthPage onSignIn={signIn} onSignUp={signUp} />
+    return <AuthPage onSignIn={signIn} />
   }
 
   const prevMonth = () => {
@@ -67,13 +70,16 @@ export default function App() {
     <AppLayout
       email={user.email ?? ''}
       view={view}
+      isSuperAdmin={profile?.role === 'superadmin'}
       onViewChange={setView}
       onSignOut={signOut}
       monthLabel={`${MONTHS[month - 1]} ${year}`}
       onPrevMonth={prevMonth}
       onNextMonth={nextMonth}
     >
-      {view === 'dashboard' ? (
+      {view === 'admin' ? (
+        <SuperAdminPage />
+      ) : view === 'dashboard' ? (
         <DashboardPage
           transactions={transactions}
           income={income}
