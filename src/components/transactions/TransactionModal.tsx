@@ -5,12 +5,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { CATEGORIES } from '@/lib/categories'
 import type { Card, Transaction, TransactionPayload, TransactionType } from '@/types'
-
-const CATEGORIES: Record<TransactionType, string[]> = {
-  income: ['Salario', 'Freelance', 'Inversiones', 'Alquiler', 'Otro'],
-  expense: ['Vivienda', 'Alimentación', 'Transporte', 'Salud', 'Educación', 'Entretenimiento', 'Ropa', 'Servicios', 'Otro'],
-}
 
 interface Props {
   open: boolean

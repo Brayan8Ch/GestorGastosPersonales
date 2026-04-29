@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { Eye } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DeleteConfirmPopover } from '@/components/ui/delete-confirm-popover'
+import { getCategoryIcon } from '@/lib/categories'
 import type { Transaction } from '@/types'
 
 function formatARS(n: number) {
@@ -19,9 +21,10 @@ interface Props {
   onEdit: (t: Transaction) => void
   onDelete: (id: string) => void
   onViewReceipt: (path: string) => void
+  onDetail: (t: Transaction) => void
 }
 
-export function TransactionsPage({ transactions, onAdd, onEdit, onDelete, onViewReceipt }: Props) {
+export function TransactionsPage({ transactions, onAdd, onEdit, onDelete, onViewReceipt, onDetail }: Props) {
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all')
 
   const filtered = filter === 'all' ? transactions : transactions.filter(t => t.type === filter)
@@ -59,7 +62,14 @@ export function TransactionsPage({ transactions, onAdd, onEdit, onDelete, onView
           <div className="divide-y divide-border">
             {filtered.map(t => (
               <div key={t.id} className="flex items-center gap-3 px-6 py-3 hover:bg-muted/30 transition-colors">
-                <div className={`w-1.5 h-10 rounded-full flex-shrink-0 ${t.type === 'income' ? 'bg-primary' : 'bg-destructive'}`} />
+                {(() => {
+                  const Icon = getCategoryIcon(t.category)
+                  return (
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${t.type === 'income' ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                      <Icon size={15} />
+                    </div>
+                  )
+                })()}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{t.category}</p>
                   <p className="text-xs text-muted-foreground truncate">{t.description || '—'} · {formatDate(t.date)}</p>
@@ -68,6 +78,13 @@ export function TransactionsPage({ transactions, onAdd, onEdit, onDelete, onView
                   {t.type === 'income' ? '+' : '−'}{formatARS(t.amount)}
                 </span>
                 <div className="flex items-center gap-0.5 flex-shrink-0">
+                  <button
+                    onClick={() => onDetail(t)}
+                    className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                    title="Ver detalle"
+                  >
+                    <Eye size={13} />
+                  </button>
                   {t.receipt_url && (
                     <button
                       onClick={() => onViewReceipt(t.receipt_url!)}

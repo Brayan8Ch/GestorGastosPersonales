@@ -84,42 +84,46 @@ export function AppLayout({
               onClick={() => setMenuOpen(prev => !prev)}
               aria-label={menuOpen ? 'Cerrar menú' : 'Abrir menú'}
             >
-              {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              <span className={`transition-transform duration-200 ${menuOpen ? 'rotate-90' : 'rotate-0'}`}>
+                {menuOpen ? <X size={18} /> : <Menu size={18} />}
+              </span>
             </button>
           </div>
         </div>
 
         {/* Mobile dropdown */}
-        {menuOpen && (
-          <div className="sm:hidden border-t border-border bg-card">
-            <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
-              {navItems.map(({ key, label }) => (
-                <button
-                  key={key}
-                  onClick={() => handleNav(key)}
-                  className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                    view === key
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-              <div className="mt-2 pt-2 border-t border-border flex items-center justify-between gap-3">
-                <span className="text-xs text-muted-foreground truncate">{email}</span>
-                <Button variant="outline" size="sm" onClick={onSignOut} className="text-xs shrink-0">
-                  Cerrar sesión
-                </Button>
-              </div>
+        <div
+          className={`sm:hidden border-border bg-card overflow-hidden transition-all duration-300 ease-in-out ${
+            menuOpen ? 'max-h-64 opacity-100 border-t' : 'max-h-0 opacity-0'
+          }`}
+        >
+          <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-1">
+            {navItems.map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => handleNav(key)}
+                className={`w-full text-left px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
+                  view === key
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+            <div className="mt-2 pt-2 border-t border-border flex items-center justify-between gap-3">
+              <span className="text-xs text-muted-foreground truncate">{email}</span>
+              <Button variant="outline" size="sm" onClick={onSignOut} className="text-xs shrink-0">
+                Cerrar sesión
+              </Button>
             </div>
           </div>
-        )}
+        </div>
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 w-full">
         {view !== 'admin' && (
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-3 mb-6 justify-center md:justify-start">
             <button
               onClick={onPrevMonth}
               className="w-8 h-8 flex items-center justify-center rounded-md border border-border hover:border-primary/50 transition-colors text-muted-foreground hover:text-foreground"

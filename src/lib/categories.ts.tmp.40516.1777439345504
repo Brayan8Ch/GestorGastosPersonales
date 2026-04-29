@@ -1,0 +1,40 @@
+import {
+  Briefcase,
+  Laptop,
+  TrendingUp,
+  Home,
+  CircleDot,
+  ShoppingCart,
+  Car,
+  Heart,
+  BookOpen,
+  Gamepad2,
+  Shirt,
+  Zap,
+  PiggyBank,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+export const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  // income
+  Salario: Briefcase,
+  Freelance: Laptop,
+  Inversiones: TrendingUp,
+  Alquiler: Home,
+  // expense
+  Vivienda: Home,
+  Alimentación: ShoppingCart,
+  Transporte: Car,
+  Salud: Heart,
+  Educación: BookOpen,
+  Entretenimiento: Gamepad2,
+  Ropa: Shirt,
+  Servicios: Zap,
+  Ahorro: PiggyBank,
+  // fallback
+  Otro: CircleDot,
+}
+
+export function getCategoryIcon(category: string): LucideIcon {
+  return CATEGORY_ICONS[category] ?? CircleDot
+}

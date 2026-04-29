@@ -4,6 +4,8 @@ import { ExpenseChart } from '@/components/dashboard/ExpenseChart'
 import { TrendChart } from '@/components/dashboard/TrendChart'
 import { SavingsCard } from '@/components/dashboard/SavingsCard'
 import { CardsCard } from '@/components/dashboard/CardsCard'
+import { useCountUp } from '@/hooks/useCountUp'
+import { getCategoryIcon } from '@/lib/categories'
 import type { Card as CardType, SavingsPlatform, Transaction } from '@/types'
 import type { PlatformPayload } from '@/hooks/useSavings'
 import type { CardPayload } from '@/hooks/useCards'
@@ -46,6 +48,10 @@ export function DashboardPage({
   const recent = transactions.slice(0, 6)
   const isPositive = balance >= 0
 
+  const animatedBalance = useCountUp(balance)
+  const animatedIncome = useCountUp(income)
+  const animatedExpense = useCountUp(expense)
+
   return (
     <div className="bento grid grid-cols-2 md:grid-cols-6 gap-3 auto-rows-auto">
 
@@ -61,17 +67,17 @@ export function DashboardPage({
         </CardHeader>
         <CardContent className="relative">
           <p className={`num text-3xl sm:text-5xl font-semibold tracking-tight leading-none ${isPositive ? 'text-primary' : 'text-destructive'}`}>
-            {formatARS(balance)}
+            {formatARS(animatedBalance)}
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
             <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground">Ingresos</p>
-              <p className="num text-base sm:text-xl font-semibold text-primary">{formatARS(income)}</p>
+              <p className="num text-base sm:text-xl font-semibold text-primary">{formatARS(animatedIncome)}</p>
             </div>
             <div className="hidden sm:block w-px h-8 bg-border" />
             <div className="space-y-0.5">
               <p className="text-xs text-muted-foreground">Egresos</p>
-              <p className="num text-base sm:text-xl font-semibold text-destructive">{formatARS(expense)}</p>
+              <p className="num text-base sm:text-xl font-semibold text-destructive">{formatARS(animatedExpense)}</p>
             </div>
             {income > 0 && (
               <>
@@ -79,7 +85,7 @@ export function DashboardPage({
                 <div className="space-y-0.5">
                   <p className="text-xs text-muted-foreground">Tasa ahorro</p>
                   <p className={`num text-base sm:text-xl font-semibold ${isPositive ? 'text-primary' : 'text-destructive'}`}>
-                    {(((income - expense) / income) * 100).toFixed(0)}%
+                    {animatedIncome > 0 ? (((animatedIncome - animatedExpense) / animatedIncome) * 100).toFixed(0) : '0'}%
                   </p>
                 </div>
               </>
@@ -147,7 +153,14 @@ export function DashboardPage({
               onClick={() => onOpenTransaction(t)}
               className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors text-left group focus-visible:outline-none focus-visible:bg-muted/40"
             >
-              <div className={`w-1 h-7 rounded-full flex-shrink-0 ${t.type === 'income' ? 'bg-primary' : 'bg-destructive'}`} />
+              {(() => {
+                const Icon = getCategoryIcon(t.category)
+                return (
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${t.type === 'income' ? 'bg-primary/10 text-primary' : 'bg-destructive/10 text-destructive'}`}>
+                    <Icon size={14} />
+                  </div>
+                )
+              })()}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-none mb-0.5">{t.category}</p>
                 <p className="text-xs text-muted-foreground truncate">{t.description || formatDate(t.date)}</p>

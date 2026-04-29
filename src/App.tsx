@@ -10,6 +10,7 @@ import { DashboardPage, MONTHS } from '@/pages/DashboardPage'
 import { TransactionsPage } from '@/pages/TransactionsPage'
 import { SuperAdminPage } from '@/pages/SuperAdminPage'
 import { TransactionModal } from '@/components/transactions/TransactionModal'
+import { TransactionDetailModal } from '@/components/transactions/TransactionDetailModal'
 import { ReceiptModal } from '@/components/transactions/ReceiptModal'
 import type { Transaction, TransactionPayload } from '@/types'
 
@@ -26,6 +27,8 @@ export default function App() {
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Transaction | null>(null)
   const [receiptPath, setReceiptPath] = useState<string | null>(null)
+  const [detailTx, setDetailTx] = useState<Transaction | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
 
   const userId = user?.id ?? ''
 
@@ -61,6 +64,7 @@ export default function App() {
 
   const openAdd = () => { setEditing(null); setModalOpen(true) }
   const openEdit = (t: Transaction) => { setEditing(t); setModalOpen(true) }
+  const openDetail = (t: Transaction) => { setDetailTx(t); setDetailOpen(true) }
 
   const handleDelete = async (id: string) => {
     await remove(id)
@@ -92,7 +96,7 @@ export default function App() {
           month={month}
           year={year}
           onAdd={openAdd}
-          onOpenTransaction={openEdit}
+          onOpenTransaction={openDetail}
           onSavePlatform={savePlatform}
           onDeletePlatform={deletePlatform}
           onSaveCard={saveCard}
@@ -105,6 +109,7 @@ export default function App() {
           onEdit={openEdit}
           onDelete={handleDelete}
           onViewReceipt={path => setReceiptPath(path)}
+          onDetail={openDetail}
         />
       )}
 
@@ -115,6 +120,13 @@ export default function App() {
         userId={userId}
         editing={editing}
         cards={cards}
+      />
+
+      <TransactionDetailModal
+        transaction={detailTx}
+        open={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        onViewReceipt={path => { setDetailOpen(false); setReceiptPath(path) }}
       />
 
       <ReceiptModal
