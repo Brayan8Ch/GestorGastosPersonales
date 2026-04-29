@@ -4,6 +4,7 @@ import type { Transaction, TransactionPayload } from '@/types'
 
 export function useTransactions(userId: string, month: number, year: number) {
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [carryover, setCarryover] = useState(0)
   const [loading, setLoading] = useState(false)
 
   const startDate = `${year}-${String(month).padStart(2, '0')}-01`
@@ -13,15 +14,26 @@ export function useTransactions(userId: string, month: number, year: number) {
     if (!userId) return
 
     setLoading(true)
-    const { data, error } = await supabase
-      .from('transactions')
-      .select('*')
-      .eq('user_id', userId)
-      .gte('date', startDate)
-      .lte('date', endDate)
-      .order('date', { ascending: false })
+    const [{ data, error }, { data: prevData }] = await Promise.all([
+      supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', userId)
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .order('date', { ascending: false }),
+      supabase
+        .from('transactions')
+        .select('type, amount')
+        .eq('user_id', userId)
+        .lt('date', startDate),
+    ])
 
     if (!error) setTransactions(data ?? [])
+    if (prevData) {
+      const prev = prevData.reduce((acc, t) => acc + (t.type === 'income' ? t.amount : -t.amount), 0)
+      setCarryover(prev)
+    }
     setLoading(false)
   }, [userId, startDate, endDate])
 
@@ -59,5 +71,5 @@ export function useTransactions(userId: string, month: number, year: number) {
   const expense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
   const balance = income - expense
 
-  return { transactions, loading, save, remove, uploadReceipt, getReceiptUrl, income, expense, balance }
+  return { transactions, loading, save, remove, uploadReceipt, getReceiptUrl, income, expense, balance, carryover }
 }

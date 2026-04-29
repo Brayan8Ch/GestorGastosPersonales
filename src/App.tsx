@@ -32,7 +32,7 @@ export default function App() {
 
   const userId = user?.id ?? ''
 
-  const { transactions, save, remove, uploadReceipt, getReceiptUrl, income, expense, balance } =
+  const { transactions, save, remove, uploadReceipt, getReceiptUrl, income, expense, balance, carryover } =
     useTransactions(userId, month, year)
   const { platforms, total: savingsTotal, save: savePlatform, remove: deletePlatform } = useSavings(userId)
   const { cards, save: saveCard, remove: deleteCard } = useCards(userId)
@@ -82,13 +82,14 @@ export default function App() {
       onNextMonth={nextMonth}
     >
       {view === 'admin' ? (
-        <SuperAdminPage />
+        <SuperAdminPage userId={userId} />
       ) : view === 'dashboard' ? (
         <DashboardPage
           transactions={transactions}
           income={income}
           expense={expense}
           balance={balance}
+          carryover={carryover}
           platforms={platforms}
           savingsTotal={savingsTotal}
           cards={cards}

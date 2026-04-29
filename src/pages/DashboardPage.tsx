@@ -26,6 +26,7 @@ interface Props {
   income: number
   expense: number
   balance: number
+  carryover: number
   platforms: SavingsPlatform[]
   savingsTotal: number
   cards: CardType[]
@@ -41,33 +42,34 @@ interface Props {
 }
 
 export function DashboardPage({
-  transactions, income, expense, balance,
+  transactions, income, expense, balance, carryover,
   platforms, savingsTotal, cards, userId, month, year,
   onAdd, onOpenTransaction, onSavePlatform, onDeletePlatform, onSaveCard, onDeleteCard,
 }: Props) {
   const recent = transactions.slice(0, 6)
-  const isPositive = balance >= 0
+  const totalBalance = carryover + balance
+  const isPositive = totalBalance >= 0
 
-  const animatedBalance = useCountUp(balance)
+  const animatedTotal = useCountUp(totalBalance)
   const animatedIncome = useCountUp(income)
   const animatedExpense = useCountUp(expense)
+  const animatedCarryover = useCountUp(carryover)
 
   return (
     <div className="bento grid grid-cols-2 md:grid-cols-6 gap-3 auto-rows-auto">
 
       {/* ── Balance ── col-span-4 */}
       <Card className="bento-card col-span-2 md:col-span-4 relative overflow-hidden border-border/60">
-        {/* subtle gradient mesh */}
         <div className="pointer-events-none absolute inset-0 opacity-30"
           style={{ background: `radial-gradient(ellipse 60% 80% at 10% 50%, ${isPositive ? '#3ecf8e' : '#f04444'}18, transparent)` }} />
         <CardHeader className="pb-1 relative">
           <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-            Balance mensual
+            Saldo disponible
           </CardTitle>
         </CardHeader>
         <CardContent className="relative">
           <p className={`num text-3xl sm:text-5xl font-semibold tracking-tight leading-none ${isPositive ? 'text-primary' : 'text-destructive'}`}>
-            {formatARS(animatedBalance)}
+            {formatARS(animatedTotal)}
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-3 mt-5">
             <div className="space-y-0.5">
@@ -79,6 +81,17 @@ export function DashboardPage({
               <p className="text-xs text-muted-foreground">Egresos</p>
               <p className="num text-base sm:text-xl font-semibold text-destructive">{formatARS(animatedExpense)}</p>
             </div>
+            {carryover !== 0 && (
+              <>
+                <div className="hidden sm:block w-px h-8 bg-border" />
+                <div className="space-y-0.5">
+                  <p className="text-xs text-muted-foreground">Saldo anterior</p>
+                  <p className={`num text-base sm:text-xl font-semibold ${carryover >= 0 ? 'text-primary' : 'text-destructive'}`}>
+                    {formatARS(animatedCarryover)}
+                  </p>
+                </div>
+              </>
+            )}
             {income > 0 && (
               <>
                 <div className="hidden sm:block w-px h-8 bg-border" />
