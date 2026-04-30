@@ -9,5 +9,6 @@ document.documentElement.classList.add('dark')
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
+    <SpeedInsights/>
   </StrictMode>,
 )
