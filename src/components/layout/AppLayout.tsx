@@ -53,6 +53,7 @@ export function AppLayout({
             {/* Desktop nav */}
             <nav className="hidden sm:flex gap-1">
               {navItems.map(({ key, label }) => (
+                
                 <button
                   key={key}
                   onClick={() => handleNav(key)}
