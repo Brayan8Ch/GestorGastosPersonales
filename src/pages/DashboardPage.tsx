@@ -118,7 +118,7 @@ export function DashboardPage({
           </svg>
           Nueva transacción
         </button>
-        <RiskCard income={income} expense={expense} />
+        <RiskCard income={income} expense={expense} carryover={carryover} totalBalance={totalBalance} />
       </div>
 
       {/* ── Trend chart ── col-span-4 */}

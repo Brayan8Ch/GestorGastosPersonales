@@ -1,15 +1,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-function getRiskInfo(income: number, expense: number) {
-  if (income === 0) {
+function getRiskInfo(income: number, expense: number, carryover: number) {
+  const paymentCapacity = carryover + income
+  if (paymentCapacity === 0) {
     const hasCost = expense > 0
-    return { label: hasCost ? 'Crítico' : 'Sin datos', ratio: hasCost ? 100 : 0, color: hasCost ? '#f04444' : '#555', description: hasCost ? 'Gastos sin ingresos.' : 'Registrá ingresos.' }
+    return { label: hasCost ? 'Crítico' : 'Sin datos', ratio: hasCost ? 100 : 0, color: hasCost ? '#f04444' : '#555', description: hasCost ? 'Gastos sin capacidad de pago.' : 'Registrá ingresos.' }
   }
-  const ratio = Math.min((expense / income) * 100, 150)
-  if (ratio <= 50)  return { label: 'Saludable', ratio, color: '#3ecf8e', description: 'Ahorrás más de la mitad de tus ingresos.' }
-  if (ratio <= 75)  return { label: 'Moderado',  ratio, color: '#f59e0b', description: 'Tus gastos están en un rango normal.' }
-  if (ratio <= 90)  return { label: 'Elevado',   ratio, color: '#f97316', description: 'Gastás la mayor parte de tus ingresos.' }
-  return              { label: 'Crítico',   ratio, color: '#f04444', description: 'Tus gastos superan o rozan tus ingresos.' }
+  const ratio = Math.min((expense / paymentCapacity) * 100, 100)
+  if (ratio <= 30) return { label: 'Saludable', ratio, color: '#3ecf8e', description: 'Usaste poco de tu capacidad disponible.' }
+  if (ratio <= 60) return { label: 'Moderado',  ratio, color: '#f59e0b', description: 'Tus gastos están en un rango normal.' }
+  if (ratio <= 85) return { label: 'Elevado',   ratio, color: '#f97316', description: 'Consumiste gran parte de tu capacidad.' }
+  return             { label: 'Crítico',   ratio, color: '#f04444', description: 'Casi agotaste tu capacidad de pago.' }
 }
 
 function formatARS(n: number) {
@@ -20,10 +21,12 @@ const R = 40
 const CIRC = Math.PI * R        // semicircle circumference
 const CX = 60, CY = 56
 
-interface Props { income: number; expense: number }
+interface Props { income: number; expense: number; carryover: number; totalBalance: number }
 
-export function RiskCard({ income, expense }: Props) {
-  const risk = getRiskInfo(income, expense)
+export function RiskCard({ income, expense, carryover, totalBalance }: Props) {
+  const paymentCapacity = carryover + income
+  const risk = getRiskInfo(income, expense, carryover)
+  const autonomyMonths = expense > 0 && totalBalance > 0 ? totalBalance / expense : null
   const fill = (Math.min(risk.ratio, 100) / 100) * CIRC
   const dash = `${fill} ${CIRC}`
   const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false
@@ -80,11 +83,18 @@ export function RiskCard({ income, expense }: Props) {
           </p>
         </div>
 
-        {income > 0 && (
+        {autonomyMonths !== null && (
+          <div className="w-full rounded-lg bg-muted/40 p-2.5 border border-border/50 text-center">
+            <p className="text-xs text-muted-foreground mb-1">Autonomía sin ingresos</p>
+            <p className="num text-sm font-semibold text-primary">{autonomyMonths.toFixed(1)} meses</p>
+          </div>
+        )}
+
+        {(paymentCapacity > 0 || expense > 0) && (
           <div className="grid grid-cols-2 gap-2 w-full">
             <div className="rounded-lg bg-muted/40 p-2.5 border border-border/50">
-              <p className="text-xs text-muted-foreground mb-1">Ingresos</p>
-              <p className="num text-sm font-semibold text-primary">{formatARS(income)}</p>
+              <p className="text-xs text-muted-foreground mb-1">Capacidad</p>
+              <p className="num text-sm font-semibold text-primary">{formatARS(paymentCapacity)}</p>
             </div>
             <div className="rounded-lg bg-muted/40 p-2.5 border border-border/50">
               <p className="text-xs text-muted-foreground mb-1">Egresos</p>
